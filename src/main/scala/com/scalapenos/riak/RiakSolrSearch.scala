@@ -42,7 +42,7 @@ case class RiakSolrQuery() {
   def rows(value:Option[Long]) =
     if(!value.isEmpty) m("rows") = value.get.toString
     else m.remove("rows")
-  def sort(value:Option[Long]) =
+  def sort(value:Option[String]) =
     if(!value.isEmpty) m("sort") = value.get.toString
     else m.remove("sort")
   def wt(value:Option[RiakSolrFormat]) =
