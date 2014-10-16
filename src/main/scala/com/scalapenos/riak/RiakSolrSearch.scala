@@ -37,8 +37,8 @@ case class RiakSolrQuery() {
     if(!value.isEmpty) m("q_op") = value.get
     else m.remove("q_op")
   def start(value:Option[Long]) =
-    if(!value.isEmpty) m("q_op") = value.get.toString
-    else m.remove("q_op")
+    if(!value.isEmpty) m("start") = value.get.toString
+    else m.remove("start")
   def rows(value:Option[Long]) =
     if(!value.isEmpty) m("rows") = value.get.toString
     else m.remove("rows")
