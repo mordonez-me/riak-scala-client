@@ -21,4 +21,11 @@ package internal
 private[riak] final class RiakHttpClient(helper: RiakHttpClientHelper, server: RiakServerInfo) extends RiakClient {
   def ping = helper.ping(server)
   def bucket(name: String, resolver: RiakConflictsResolver) = new RiakHttpBucket(helper, server, name, resolver)
+  def mapReduce(input: RiakMapReduce.Input) = new RiakHttpMapReduce(helper, server, input)
+}
+
+private [riak] final class RiakHttpMapReduce(helper: RiakHttpClientHelper, server: RiakServerInfo, input: RiakMapReduce.Input) extends RiakMapReduce {
+  import spray.json.RootJsonReader
+  import com.scalapenos.riak.RiakMapReduce.QueryPhase
+  def query[R: RootJsonReader](phases: Seq[(QueryPhase.Value, QueryPhase)]) = helper.mapReduce[R](server, input, phases)
 }

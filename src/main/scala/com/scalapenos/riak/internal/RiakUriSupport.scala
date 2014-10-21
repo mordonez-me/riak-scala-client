@@ -67,6 +67,9 @@ private[riak] trait RiakUriSupport {
   def SearchSolrUri(server: RiakServerInfo, bucket: String, parameters: QueryParameters) =
     uri(server, s"solr/${bucket}/select/", parameters.query)
 
+  def mapReduceUrl(server: RiakServerInfo) = {
+    uri(server, s"mapred")
+  }
 
   private def uri(server: RiakServerInfo, path: String, query: Query = Query.Empty): Uri = {
     Uri.from(

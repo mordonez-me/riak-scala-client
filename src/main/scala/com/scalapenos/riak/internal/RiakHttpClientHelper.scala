@@ -17,6 +17,7 @@
 package com.scalapenos.riak
 package internal
 
+import spray.json.RootJsonReader
 import akka.actor._
 import spray.http._
 import spray.http.parser.HttpParser
@@ -35,6 +36,7 @@ import HttpHeaders._
 import HttpCharsets._
 import spray.httpx.unmarshalling.Unmarshaller
 import spray.can.parsing.HttpHeaderParser
+
 
 
 private[riak] object RiakHttpClientHelper {
@@ -190,6 +192,36 @@ private[riak] class RiakHttpClientHelper(system: ActorSystem) extends RiakUriSup
         case BadRequest => throw new ParametersInvalid(s"Invalid search or params (${solrQuery.m.toMap}) ")
         case OK         => successful(toRiakSearch(response, server, bucket, resolver))
         case other      => throw new BucketOperationFailed(s"Solr search '$query.toString' in bucket '$bucket' produced an unexpected response code '$other'.")
+      }
+    }
+  }
+
+  // ==========================================================================
+  // Map Reduce
+  // ==========================================================================
+
+  def mapReduce[R: RootJsonReader](server: RiakServerInfo, input: RiakMapReduce.Input, phases: Seq[(RiakMapReduce.QueryPhase.Value, RiakMapReduce.QueryPhase)]): Future[R] = {
+    import com.scalapenos.riak.serialization.RiakMapReduceSerialization._
+    import spray.json._
+    import spray.httpx.unmarshalling._
+    import spray.httpx.SprayJsonSupport._
+  
+    val entity = JsObject(
+      "inputs" → input.toJson,
+      "query"  → JsArray(
+        (phases map {
+          case (op, spec) ⇒ JsObject(op.toString.toLowerCase → spec.toJson)
+        }).toList
+      )
+    )
+  
+    httpRequest(Post(mapReduceUrl(server), entity)) map { response ⇒
+      response.status match {
+        case OK ⇒ response.entity.as[R] match {
+          case Right(result) ⇒ result
+          case Left(error)   ⇒ throw new MapReduceOperationFailed(error.toString)
+        }
+        case other ⇒ throw new MapReduceOperationFailed(response.entity.asString)
       }
     }
   }
