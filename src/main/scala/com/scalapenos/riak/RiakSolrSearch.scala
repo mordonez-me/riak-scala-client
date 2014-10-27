@@ -113,7 +113,7 @@ private[riak] sealed case class RiakSolrSearchResponse(
 
 
 private[riak] sealed case class RiakSolrSearchValueResponse(
-  values:List[Future[Option[RiakValue]]])
+  values:Future[List[RiakValue]])
 
 private[riak] object RiakSolrSearchResponse extends RiakSolrSearchJsonFormats{
   implicit val jsonFormat = jsonFormat4(RiakSolrSearchResponse.apply)

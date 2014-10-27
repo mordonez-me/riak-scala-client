@@ -81,8 +81,8 @@ class RiakBucketSolrSearchSpec extends RiakClientSpecification with RandomKeySup
     solrQuery.q(Some("title:titulo*"))
 
     val query = bucket.solrSearch(solrQuery).await
-    val listValues =
-      query.responseValues.values.map(_.map(_.get.as[SongTestComplex]).await)
+
+    val listValues = (query.responseValues.values.map(values => values.map(_.as[SongTestComplex]))).await
 
     listValues.contains(songComplex1) must beTrue
     listValues.contains(songComplex2) must beTrue

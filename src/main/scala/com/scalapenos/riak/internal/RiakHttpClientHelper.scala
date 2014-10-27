@@ -243,9 +243,11 @@ private[riak] class RiakHttpClientHelper(system: ActorSystem) extends RiakUriSup
 
       val responseObject = response.convertTo[RiakSolrSearchResponse]
 
+      def getItem(item:RiakSolrSearchDoc) = fetch(server, bucket, item.id.replace("\"",""), resolver)
+
       //TODO: Fix double quote in string to avoid using replace
       val responseValues = RiakSolrSearchValueResponse(
-        values=responseObject.docs.map(x => fetch(server, bucket, x.id.replace("\"",""), resolver)))
+        values=traverse(responseObject.docs)(getItem).map(_.flatten))
 
       RiakSolrResult(
         response=responseObject,
